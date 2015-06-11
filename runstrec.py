@@ -156,7 +156,7 @@ def main(args):
     eqxml = os.path.join(pfolder,'eqxml.xml')
     hasquakeml = os.path.isfile(quakeml)
     haseqxml = os.path.isfile(eqxml)
-    eventid = args.source + args.code
+    eventid = args.code
     if not hasquakeml and not haseqxml:
         print 'Origin products must be specified in either EQXML or QuakeML formats.'
         sys.exit(1)
