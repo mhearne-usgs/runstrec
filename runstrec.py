@@ -18,7 +18,7 @@ from neicio.cmdoutput import getCommandOutput
 
 EVENTURL = 'http://earthquake.usgs.gov/fdsnws/event/1/query?eventid=[EVENTID]&format=geojson'
 TIMEFMT = '%Y-%m-%dT%H:%M:%S'
-PDLCOMMAND = '''java -jar [PDLDIR]/ProductClient.jar --send --configFile=[CONFIG] --type=strec --source=[SOURCE] --code=[CODE]  --property-latitude=[LAT] --property-longitude=[LON] --property-depth=[DEPTH] --file=[JSONFILE] [PROPS]'''
+PDLCOMMAND = '''java -jar [PDLDIR]/ProductClient.jar --send --configFile=[CONFIG] --type=strec --source=[SOURCE] --code=[CODE]  --property-latitude=[LAT] --property-longitude=[LON] --property-depth=[DEPTH] --property-eventtime=[TIME] --file=[JSONFILE] [PROPS]'''
 
 def getPlungeValues(strike,dip,rake,mag):
     mom = 10**((mag*1.5)+16.1)
@@ -130,7 +130,7 @@ def getVersionFolder(homedir,eventid):
     return versionfolder
 
 def main(args):
-    isDev = True
+    isDev = args.isdev
     #Get the user parameters config object (should be stored in ~/.strec/strec.ini)
     try:
         config,configfile = strec.utils.getConfig()
@@ -193,8 +193,10 @@ def main(args):
     cmd = cmd.replace('[CODE]',eventid)
     cmd = cmd.replace('[LAT]','%.4f' % lat)
     cmd = cmd.replace('[LON]','%.4f' % lon)
+    cmd = cmd.replace('[TIME]',etime.strftime(TIMEFMT))
     cmd = cmd.replace('[DEPTH]','%.1f' % depth)
     cmd = cmd.replace('[JSONFILE]',jsonfile)
+    
     jdict = json.loads(jsonstr.getvalue())
     propnuggets = []
     for propkey,propvalue in jdict['properties'].iteritems():
@@ -209,9 +211,6 @@ def main(args):
         print 'Command %s succeeded.' % cmd
     print stdout
     print stderr
-    
-    
-    
         
 if __name__ == '__main__':
     usage = """Run STREC from PDL."""
@@ -221,5 +220,6 @@ if __name__ == '__main__':
     parser.add_argument('--code',help='PDL product code (not including source network)')
     parser.add_argument('--source',help='PDL product source (source + code = id)')
     parser.add_argument('--status',help='PDL product status (UPDATE or DELETE)')
+    parser.add_argument('--isdev',action='store_true')
     pargs, unknown = parser.parse_known_args()
     main(pargs)
